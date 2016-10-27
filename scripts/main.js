@@ -19,7 +19,6 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             // End query.
         }
     }).then(function (resp) {
-        console.log(resp)
 
 
         //Mapeia resutlados do source
@@ -27,8 +26,6 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             return i['_source'];
             });
         //console.log(results)
-
-       console.log(results)
 
         // d3 donut chart
 
@@ -93,12 +90,21 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             query: {
                 // Boolean query for matching and excluding items.
                 match : {"DESCRICAO": "salada"}
-            }
+            },
+            sort:[
+                {
+                    "DATA_EMISSAO": {
+                        "order": "asc"
+                    }
+                }
+            ]
             // Aggregate on the results
 
             // End query.
         }
     }).then(function (resp) {
+
+        console.log(resp);
 
         var results = resp['hits']['hits'].map(function(i){
             return i['_source'];
@@ -108,21 +114,53 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
         //Lavel do grafico
         var vals = ["Valor"]
 
-        //Adiciona valores ao grafico
+        //Adiciona valores ao array
         results.map(function (i) {
            vals.push(i.VL_UNIT)
         });
 
-        console.log(vals)
+        //Labels
+        var labels = ["Descricao"]
+        results.map(function (i) {
+            labels.push(i.DESCRICAO)
+        });
+
+        //Dates
+        var dates = ["Data"]
+        results.map(function (i) {
+            dates.push(i.DATA_EMISSAO)
+        });
+
         var chart = c3.generate({
-            bindto: '#chart',
             data: {
+                x: 'Data',
+                xFormat: '%d/%m/%Y',    //Como a data é parseada
                 columns: [
-                    vals,
-                    ['data2', 50, 20, 10, 40, 15, 25]
-                ]
+                    dates,
+                    vals
+                ],
+                type: 'bar'
+            },
+            axis : {
+                x : {
+                    type : 'timeseries',
+                    tick: {
+                        tick: {
+                            format: '%d/%m/%Y' //Como a data é mostrada
+                        }
+                    }
+                }
+            },
+            bar: {
+                width: {
+                    ratio: 0.5 // this makes bar width 50% of length between ticks
+                }
+                // or
+                //width: 100 // this makes bar width 100px
             }
         });
+
+
 
     });
 
