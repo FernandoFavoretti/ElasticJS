@@ -77,6 +77,10 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
         });
 
 
+        var color = d3.scale.linear()
+            .domain([min, media, max])
+            .range(['#930F16', '#F0F0D0', '#228B22']);
+
         //Mapeia resutlados do source
         var results = resp['hits']['hits'].map(function (i) {
             return i['_source'];
@@ -85,11 +89,13 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
 
 
         data = [
-            {label:"Val. Médios", value:media},
+            {label:"Val. Médio", value:media},
             {label:"Val. Máximo", value:max},
-            {label:"Val. Mínimo", value:min},
+            {label:"Val. Mínimo", value:min}
         ];
 
+
+        var div = d3.select("body").append("div").attr("class", "toolTip");
 
         var axisMargin = 20,
             margin = 40,
@@ -100,9 +106,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             barPadding = (height-axisMargin-margin*2)*0.6/data.length,
             data, bar, svg, scale, xAxis, labelWidth = 0;
 
-        var div = d3.select("body").append("div").attr("class", "toolTip");
-
-
+        max = d3.max(data, function(d) { return d.value; });
 
         svg = d3.select('#chart3')
             .append("svg")
@@ -143,6 +147,10 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
         bar.append("rect")
             .attr("transform", "translate("+labelWidth+", 0)")
             .attr("height", barHeight)
+            .attr("width", 0)
+            .transition()
+            .duration(1500)
+            .delay(function(d,i){ return i*250})
             .attr("width", function(d){
                 return scale(d.value);
             });
@@ -153,9 +161,8 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             .attr("dx", -valueMargin + labelWidth) //margin right
             .attr("dy", ".35em") //vertical align middle
             .attr("text-anchor", "end")
-
             .text(function(d){
-                return ("R$ "+ d.value);
+                return (d.value+"%");
             })
             .attr("x", function(d){
                 var width = this.getBBox().width;
@@ -167,7 +174,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
                 div.style("left", d3.event.pageX+10+"px");
                 div.style("top", d3.event.pageY-25+"px");
                 div.style("display", "inline-block");
-                div.html((d.label)+"<br> R$ "+(d.value));
+                div.html((d.label)+"<br>"+(d.value)+"%");
             });
         bar
             .on("mouseout", function(d){
@@ -178,6 +185,8 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             .attr("class", "axisHorizontal")
             .attr("transform", "translate(" + (margin + labelWidth) + ","+ (height - axisMargin - margin)+")")
             .call(xAxis);
+
+
 
 
     });
