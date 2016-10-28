@@ -3,68 +3,117 @@
 	<link href="css/c3.css" rel="stylesheet" type="text/css">
 
 	<!-- Load d3.js and c3.js -->
-	<script src="scripts/d3.v3.min.js" charset="utf-8"></script>
-	<script src="scripts/c3.min.js"></script>
-	<script type="text/javascript" src="scripts/mainc3.js"></script>
+	<script src="scripts/d3.v3.js" charset="utf-8"></script>
+	<script src="scripts/c3.js"></script>
 	<title>Elastic Aggregations</title>
 	<script src="scripts/require.js"></script>
-	<script>require(["scripts/main"], function () {})</script>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="Carlos Alvarez - Alvarez.is">
+
 	<link href="assets/css/bootstrap.css" rel="stylesheet">
 	<link href="assets/css/main.css" rel="stylesheet">
+	<link href="css/forms.css" rel="stylesheet">
+    <script>require(["scripts/main"], function () {})</script>
+	<script>
+		function clear(){
+			document.getElementById("chart").innerHTML = "";
+		}
+		function start(){
+			require(["scripts/main"], function () {})
+		}
+	</script>
+
+
 
 	<style type="text/css">
       body {
         padding-top: 60px;
       }
+
+
+      .toolTip {
+          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+          position: absolute;
+          display: none;
+          width: auto;
+          height: auto;
+          background: none repeat scroll 0 0 white;
+          border: 0 none;
+          border-radius: 8px 8px 8px 8px;
+          box-shadow: -3px 3px 15px #888888;
+          color: black;
+          font: 12px sans-serif;
+          padding: 5px;
+          text-align: center;
+      }
+
+      text {
+          font: 10px sans-serif;
+          color: white;
+      }
+      text.value {
+          font-size: 120%;
+          fill: white;
+      }
+
+      .axisHorizontal path{
+          fill: none;
+      }
+
+      .axisHorizontal .tick line {
+          stroke-width: 1;
+          stroke: rgba(0, 0, 0, 0.2);
+      }
+
+        .bar:hover{
+            fill: orange
+        }
+
+
+
     </style>
 
 	<title>BLOCKS - Bootstrap Dashboard Theme</title>
 
   </head>
   <body bgcolor="#1f1f1f">
-  
+
 
     <div class="container">
 
-     	<div class="row">
+		<div class="row">
 
-        	<div class="col-sm-3 col-lg-12">
-      			<div class="dash-unit"  style="height: 350px">
+			<div class="col-sm-3 col-lg-12">
+				<div class="dash-unit"  style="height: 150px">
+					<form class="form">
+						<input type="text" class="key" id="keyword" placeholder="Palavra Chave">
+						</form>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="row">
+        	<div class="col-sm-6 col-lg-12">
+      			<div class="dash-unit"  style="height: 350px" >
 	      			<dtitle>Query Graph</dtitle>
-					<div id="chart"></div>
+					<div id="chart23"></div>
 				</div>
         	</div>
 		</div>
 
 	<div class="row">
 
-			<div class="col-sm-3 col-lg-6">
+			<div class="col-sm-3 col-lg-12">
 
-				<div class="dash-unit">
+				<div class="dash-unit" id="dashMean">
 				  <dtitle>Query Graph</dtitle>
 
-					<div id="meanChart"></div><div class="media">asdas</div>
-					<div id="maxChart"></div><div class="media">asdas</div>
-
+					<div id="chart3"></div>
 
 
 				</div>
 		  	</div>
 
 
-		<div class="col-sm-6 col-lg-6">
-
-			<div class="dash-unit">
-				<dtitle>Query Graph</dtitle>
-
-
-
-			</div>
-		</div>
 
 	</div>
 	</div>

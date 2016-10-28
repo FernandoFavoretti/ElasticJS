@@ -1,6 +1,4 @@
 define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) {
-
-    "use strict";
     var client = new elasticsearch.Client();
 
     client.search({
@@ -12,7 +10,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
 
             query: {
                 // Boolean query for matching and excluding items.
-                match : {"DESCRICAO": "salada"}
+                match: {"DESCRICAO": "salada"}
             }
             // Aggregate on the results
 
@@ -20,92 +18,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
         }
     }).then(function (resp) {
 
-
-        //Mapeia resutlados do source
-       var results = resp['hits']['hits'].map(function(i){
-            return i['_source'];
-            });
-        //console.log(results)
-
-        // d3 donut chart
-
-
-        var width = 600,
-            height = 300,
-            radius = Math.min(width, height) / 2;
-
-
-        var color = ['#ff7f0e', '#d62728', '#2ca02c', '#1f77b4'];
-
-        var arc = d3.svg.arc()
-            .outerRadius(radius - 60)
-            .innerRadius(120);
-
-        //diz que val unit tem os dados de valores
-        var pie = d3.layout.pie()
-            .sort(null)
-            .value(function (d) { return d.VL_UNIT; });
-
-        var svg = d3.select("#donut-chart").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .attr("transform", "translate(" + width/1.4 + "," + height/2 + ")");
-
-
-        //Diz que "results" tem os dados
-        var g = svg.selectAll(".arc")
-            .data(pie(results))
-            .enter()
-            .append("g")
-            .attr("class", "arc");
-
-
-
-        g.append("path")
-            .attr("d", arc)
-            .style("fill", function (d, i) { return color[i]; })
-            .transition()
-            .ease("exp")
-            .duration(2000)
-            .attrTween("d", tweenPie);
-
-        //Escreve os dados de "DESCRICAO"
-        g.append("text")
-            .attr("transform", function (d) { return "translate(" + arc.centroid(d) + ")"; })
-            .attr("dy", ".35em")
-            .style("text-anchor", "middle")
-            .style("fill", "black")
-            .text(function (d) { return d.data.DESCRICAO; });
-
-    });
-
-    client.search({
-        index: 'prodam',
-        size: 10,
-
-        body: {
-            // Begin query.
-
-            query: {
-                // Boolean query for matching and excluding items.
-                match : {"DESCRICAO": "benegrip"}
-            },
-            sort:[
-                {
-                    "DATA_EMISSAO": {
-                        "order": "asc"
-                    }
-                }
-            ]
-            // Aggregate on the results
-
-            // End query.
-        }
-    }).then(function (resp) {
-
-
-
+        //My Data
         var results = resp['hits']['hits'].map(function(i){
             return i['_source'];
         });
@@ -117,7 +30,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
 
         //Adiciona valores ao array
         results.map(function (i) {
-           vals.push(i.VL_UNIT)
+            vals.push(i.VL_UNIT)
             onlyvals.push(i.VL_UNIT)
         });
 
@@ -138,37 +51,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             dates.push(withoutYear)
         });
 
-
-
-        var chart = c3.generate({
-            data: {
-                x: 'Data',
-                xFormat: '%d/%m/%Y',    //Como a data é parseada
-                columns: [
-                    dates,
-                    vals
-                ],
-                type: 'bar'
-
-            },
-            axis : {
-                x : {
-                    type : 'timeseries',
-                    tick: {
-                        format: '%d/%m/%Y' // how the date is displayed
-                    }
-                }
-            },
-            bar: {
-                width: {
-                    ratio: 0.5 // this makes bar width 50% of length between ticks
-                }
-                // or
-                //width: 100 // this makes bar width 100px
-            }
-        });
-
-
+        //Medias
         var media = 0
         onlyvals.map(function (i) {
             media += parseFloat(i)
@@ -176,40 +59,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
 
         media = Number((media/onlyvals.length).toFixed(2));
 
-
-
-
-
-        var meanChart = c3.generate({
-            size: {
-                height: 100,
-                width: 480
-           },
-            bindto: '#meanChart',
-            data: {
-                columns: [
-                    ['media', media]
-                ],
-                type: 'bar'
-            },
-            axis: {
-            rotated: true,
-                x:{
-                    tick: {
-                        values: ['']
-                    }
-                }
-
-            },
-            bar: {
-                width: {
-                    ratio: 0.5 // this makes bar width 50% of length between ticks
-                }
-                // or
-                //width: 100 // this makes bar width 100px
-            }
-        });
-
+        //max
         var max = 0
         onlyvals.map(function (i) {
             if(parseFloat(i) > max ){
@@ -218,40 +68,121 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
         });
 
 
-        var maxChart = c3.generate({
-            size: {
-                height: 100,
-                width: 480
-            },
-            bindto: '#maxChart',
-            data: {
-                columns: [
-                    ['Max', max]
-                ],
-                type: 'bar'
-            },
-            axis: {
-                rotated: true,
-                x:{
-                    tick: {
-                        values: ['']
-                    }
-                }
-
-
-            },
-            bar: {
-                width: {
-                    ratio: 0.5 // this makes bar width 50% of length between ticks
-                }
-                // or
-                //width: 100 // this makes bar width 100px
+        //min
+        var min = max
+        onlyvals.map(function (i) {
+            if(parseFloat(i) < min ){
+                min = parseFloat(i)
             }
         });
 
 
+        //Mapeia resutlados do source
+        var results = resp['hits']['hits'].map(function (i) {
+            return i['_source'];
+        });
+
+
+
+        data = [
+            {label:"Val. Médios", value:media},
+            {label:"Val. Máximo", value:max},
+            {label:"Val. Mínimo", value:min},
+        ];
+
+
+        var axisMargin = 20,
+            margin = 40,
+            valueMargin = 4,
+            width = parseInt(d3.select('#dashMean').style('width'), 10),
+            height = parseInt(d3.select('#dashMean').style('height'), 10),
+            barHeight = (height-axisMargin-margin*2)* 0.4/data.length,
+            barPadding = (height-axisMargin-margin*2)*0.6/data.length,
+            data, bar, svg, scale, xAxis, labelWidth = 0;
+
+        var div = d3.select("body").append("div").attr("class", "toolTip");
+
+
+
+        svg = d3.select('#chart3')
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+
+        bar = svg.selectAll("g")
+            .data(data)
+            .enter()
+            .append("g");
+
+        bar.attr("class", "bar")
+            .attr("cx",0)
+            .attr("transform", function(d, i) {
+                return "translate(" + margin + "," + (i * (barHeight + barPadding) + barPadding) + ")";
+            });
+
+        bar.append("text")
+            .attr("class", "label")
+            .attr("y", barHeight / 2)
+            .attr("dy", ".35em") //vertical align middle
+            .text(function(d){
+                return d.label;
+            }).each(function() {
+            labelWidth = Math.ceil(Math.max(labelWidth, this.getBBox().width));
+        });
+
+        scale = d3.scale.linear()
+            .domain([0, max])
+            .range([0, width - margin*2 - labelWidth]);
+
+        xAxis = d3.svg.axis()
+            .scale(scale)
+            .tickSize(-height + 2*margin + axisMargin)
+            .orient("bottom");
+
+        bar.append("rect")
+            .attr("transform", "translate("+labelWidth+", 0)")
+            .attr("height", barHeight)
+            .attr("width", function(d){
+                return scale(d.value);
+            });
+
+        bar.append("text")
+            .attr("class", "value")
+            .attr("y", barHeight / 2)
+            .attr("dx", -valueMargin + labelWidth) //margin right
+            .attr("dy", ".35em") //vertical align middle
+            .attr("text-anchor", "end")
+
+            .text(function(d){
+                return ("R$ "+ d.value);
+            })
+            .attr("x", function(d){
+                var width = this.getBBox().width;
+                return Math.max(width + valueMargin, scale(d.value));
+            });
+
+        bar
+            .on("mousemove", function(d){
+                div.style("left", d3.event.pageX+10+"px");
+                div.style("top", d3.event.pageY-25+"px");
+                div.style("display", "inline-block");
+                div.html((d.label)+"<br> R$ "+(d.value));
+            });
+        bar
+            .on("mouseout", function(d){
+                div.style("display", "none");
+            });
+
+        svg.insert("g",":first-child")
+            .attr("class", "axisHorizontal")
+            .attr("transform", "translate(" + (margin + labelWidth) + ","+ (height - axisMargin - margin)+")")
+            .call(xAxis);
 
 
     });
 
+    /**
+     * Created by favoretti on 28/10/16.
+     */
 });
