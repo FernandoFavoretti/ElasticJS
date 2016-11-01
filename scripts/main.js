@@ -100,7 +100,6 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             barPadding = (height-axisMargin-margin*2)*0.6/data.length,
             data, bar, svg, scale, xAxis, labelWidth = 0;
 
-        max = d3.max(data, function(d) { return d.value; });
 
         svg = d3.select('#chart3')
             .append("svg")
@@ -135,7 +134,6 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
 
         xAxis = d3.svg.axis()
             .scale(scale)
-            .tickSize(-height + 2*margin + axisMargin)
             .orient("bottom");
 
         bar.append("rect")
