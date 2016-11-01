@@ -17,7 +17,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
 
     client.search({
         index: 'prodam',
-        size: 5,
+        size: 0,
 
         body: {
             // Begin query.
@@ -78,6 +78,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             {label:"Val. Mínimo", value: Number(min).toFixed(2)}
         ];
 
+        console.log(resp)
 
         var div = d3.select("body").append("div").attr("class", "toolTip");
 
@@ -153,14 +154,14 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
                 return Math.max(width + valueMargin, scale(d.value));
             });
 
-        bar
+bar
             .on("mousemove", function(d){
                 div.style("left", d3.event.pageX+10+"px");
                 div.style("top", d3.event.pageY-25+"px");
                 div.style("display", "inline-block");
                 div.html((d.label)+"<br>"+"R$ "+(d.value));
             });
-        bar
+bar
             .on("mouseout", function(d){
                 div.style("display", "none");
             });
@@ -176,118 +177,114 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
         //**********************************************************************
         // Acc Chart
 
-        var color = d3.scale.linear()
-            .domain([min, media, max])
-            .range(['#930F16', '#F0F0D0', '#228B22']);
+        results = resp.aggregations.year.buckets;
+
+        //Counts
+        var counts = []
+
+        counts.push(results.map(function (i) {
+            return i['doc_count'];
+        }));
+
+        //Semanas
+        var dataset = [];
+
+        dataset.push(results.map(function (i) {
+            return ({label: i['key_as_string'], count: i['doc_count']});
+        }));
 
 
-        var acc = resp.aggregations.intraday_return.value;
-        var count = resp.hits.total;
+        var total = (resp.aggregations.intraday_return.value);
+
+        //Data Total
+        var data2 = [{label: 'Total', count:total}];
 
 
-        dataAcc = [
-            {label:Number(acc).toFixed(2), value: count}
-        ];
+        width = parseInt(d3.select('#accChart').style('width'), 10);
+        height = parseInt(d3.select('#accChart').style('height'), 10);
+        var donutWidth = 50;
+
+        var radius = Math.min(width, height) / 2.6;
+
+
+        var color = d3.scale.category20c()
+            .range(["#4682B4", "#386890", "#2a4e6c", "#23415a", "#6a9bc3", "#90b4d2", "#1C3448"]);
+
+
+
+
+        var svg = d3.select('#chartAcc')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .append('g')
+            .attr('transform', 'translate(' + (width/2) +
+                ',' + (height / 2.4) + ')');
+
+
+        var pie = d3.layout.pie()
+            .value(function(d) { return d.count; })
+            .sort(null);
+
+        var arc = d3.svg.arc()
+            .outerRadius(radius - donutWidth)
+            .innerRadius(radius);
+
+        var arc2 = d3.svg.arc()
+            .outerRadius((radius/3) + (10)  )
+            .innerRadius(radius/3);
+
+
+        var g1 = svg
+            .append("g")
+
+
+        var g2 = svg
+            .append("g")
 
 
         var div = d3.select("body").append("div").attr("class", "toolTip");
 
-        var axisMarginAcc = 20,
-            marginAcc = 40,
-            valueMarginAcc = 4,
-            widthAcc = parseInt(d3.select('#accChart').style('width'), 10),
-            heightAcc = parseInt(d3.select('#accChart').style('height'), 10),
-            barHeightAcc = (heightAcc-axisMarginAcc-marginAcc*2)* 0.4/dataAcc.length,
-            barPaddingAcc = (heightAcc-axisMarginAcc-marginAcc*2)*0.6/dataAcc.length,
-            dataAcc, barAcc, svgAcc, scaleAcc, xAxisAcc, labelWidthAcc = 0;
 
-
-        svgAcc = d3.select('#chartAcc')
-            .append("svg")
-            .attr("width", widthAcc)
-            .attr("height", heightAcc);
-
-
-        scaleAcc = d3.scale.linear()
-            .domain([0, count])
-            .range([0, widthAcc - marginAcc*2 - labelWidthAcc]);
-
-        var xAxisAcc = d3.svg.axis()
-            .scale((acc))
-            .orient("bottom")
-
-        var yAxisAcc = d3.svg.axis()
-            .scale(count)
-            .orient("left")
-            .ticks(10);
-
-
-        barAcc = svgAcc.selectAll("g")
-            .data(dataAcc)
+        var path2 = g1.selectAll('path')
+            .data(pie(data2))
             .enter()
-            .append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        barAcc.attr("class", "bar")
-            .attr("cx",0)
-            .attr("transform", function(d, i) {
-                return "translate(" + marginAcc + "," + (i * (barHeightAcc + barPaddingAcc) + barPaddingAcc) + ")";
-            });
-
-        barAcc.append("text")
-            .attr("class", "label")
-            .attr("y", barHeightAcc / 2)
-            .attr("dy", ".35em") //vertical align middle
-            .text(function(d){
-                return d.label;
-            }).each(function() {
-            labelWidthAcc = Math.ceil(Math.max(labelWidthAcc, this.getBBox().width));
-        });
-
-
-        barAcc.append("rect")
-            .attr("transform", "translate("+labelWidthAcc+", 0)")
-            .attr("height", barHeightAcc)
-            .attr("width", 0)
+            .append('path')
+            .attr('d', arc2)
+        .on("mousemove", function(d){
+            div.style("left", d3.event.pageX+10+"px");
+            div.style("top", d3.event.pageY-25+"px");
+            div.style("display", "inline-block");
+            div.html("<b>"+(d.data.label)+"</b><br>"+"Total das vendas <b>"+(d.data.count)+"</b>");
+        })
+            .on('mouseout', function(d){
+                div.style("display", "none");
+            })
             .transition()
             .duration(1500)
             .delay(function(d,i){ return i*250})
-            .attr("width", function(d){
-                return scale(d.value);
-            });
+            .attr("fill", function(d, i) {return color(i); });
 
-        barAcc.append("text")
-            .attr("class", "value")
-            .attr("y", barHeightAcc / 2)
-            .attr("dx", -valueMarginAcc + labelWidthAcc) //margin right
-            .attr("dy", ".35em") //vertical align middle
-            .attr("text-anchor", "end")
-            .text(function(d){
-                return ("R$ "+d.value);
-            })
-            .attr("x", function(d){
-                var width = this.getBBox().width;
-                return Math.max(widthAcc + valueMarginAcc, scale(d.value));
-            });
 
-        barAcc
+        var path = g2.selectAll('path')
+            .data(pie(dataset[0]))
+            .enter()
+            .append('path')
+            .attr('d', arc)
             .on("mousemove", function(d){
                 div.style("left", d3.event.pageX+10+"px");
                 div.style("top", d3.event.pageY-25+"px");
                 div.style("display", "inline-block");
-                div.html((d.label)+"<br>"+"R$ "+(d.value));
-            });
-        barAcc
-            .on("mouseout", function(d){
-                div.style("display", "none");
-            });
+                div.html("<b>"+(d.data.label)+"</b><br>"+"Qtd. de Produtos: <b>"+(d.data.count)+"</b>");
+            })
+            .on('mouseout', function(d){
+            div.style("display", "none");
+            })
+            .transition()
+            .duration(1500)
+            .delay(function(d,i){ return i*250})
+            .attr("fill", function(d, i) {return color(i); });
 
-        svgAcc.insert("g",":first-child")
-            .attr("class", "axisHorizontal")
-            .attr("transform", "translate(" + (marginAcc + labelWidthAcc) + ","+ (heightAcc - axisMarginAcc - marginAcc)+")")
-            .call(xAxisAcc);
 
 
 
