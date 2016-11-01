@@ -12,8 +12,17 @@ function findGetParameter(parameterName) {
 }
 
 
+
 define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) {
     var client = new elasticsearch.Client();
+    var keyword = findGetParameter("keyword");
+    var quant = findGetParameter("quant");
+    var complemento = findGetParameter("complemento");
+
+
+    var matcher1 = {"DESCRICAO": ""+keyword+""}
+    var quant= {"DESCRICAO": ""+quant+""}
+    var complemento = {"DESCRICAO": ""+complemento+""}
 
     client.search({
         index: 'prodam',
@@ -26,11 +35,11 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
                 bool:{
                     // Boolean query for matching and excluding items.
                     must : [
-                        {term: {"DESCRICAO": "coca"}},
-                        {term: {"DESCRICAO": "250"}}
+                        {term: matcher1},
+                        {term: quant}
                     ],
                     should: [
-                        {fuzzy: {"DESCRICAO": "pet"}}
+                        {fuzzy: complemento}
                     ]
 
                 }
@@ -196,8 +205,9 @@ bar
 
         var total = (resp.aggregations.intraday_return.value);
 
+
         //Data Total
-        var data2 = [{label: 'Total', count:total}];
+        var data2 = [{label: 'Total', count:Number(total).toFixed(2)}];
 
 
         width = parseInt(d3.select('#accChart').style('width'), 10);
