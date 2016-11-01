@@ -17,7 +17,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
 
     client.search({
         index: 'prodam',
-        size: 0,
+
 
         body: {
             // Begin query.
@@ -78,7 +78,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
             {label:"Val. Mínimo", value: Number(min).toFixed(2)}
         ];
 
-        console.log(resp)
+
 
         var div = d3.select("body").append("div").attr("class", "toolTip");
 
@@ -175,7 +175,7 @@ bar
 
 
         //**********************************************************************
-        // Acc Chart
+        // Acc Pie Chart
 
         results = resp.aggregations.year.buckets;
 
@@ -255,7 +255,7 @@ bar
             div.style("left", d3.event.pageX+10+"px");
             div.style("top", d3.event.pageY-25+"px");
             div.style("display", "inline-block");
-            div.html("<b>"+(d.data.label)+"</b><br>"+"Total das vendas <b>"+(d.data.count)+"</b>");
+            div.html("<b>"+(d.data.label)+"</b><br>"+"Quantidade Total <b>"+(d.data.count)+"</b>");
         })
             .on('mouseout', function(d){
                 div.style("display", "none");
@@ -284,6 +284,22 @@ bar
             .duration(1500)
             .delay(function(d,i){ return i*250})
             .attr("fill", function(d, i) {return color(i); });
+
+
+
+
+
+
+
+
+        //**********************************************************************
+        // End Acc Pie Chart
+
+
+
+
+        //**********************************************************************
+        // Start Histogram
 
 
 
