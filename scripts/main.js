@@ -26,6 +26,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
 
     client.search({
         index: 'prodam',
+        size : 100,
 
 
         body: {
@@ -186,6 +187,7 @@ bar
 
         results = resp.aggregations.year.buckets;
 
+
         //Counts
         var counts = []
 
@@ -308,6 +310,117 @@ bar
 
         //**********************************************************************
         // Start Histogram
+
+        var results = resp['hits']['hits'].map(function(i){
+            return i['_source'];
+        });
+
+        var data = [];
+        for (var h = 0; h < results.length; h++){
+            data.push({name: results[h].DESCRICAO, frequency: results[h].VL_UNIT,  ID: h})
+        }
+
+
+        var color = d3.scale.category20c()
+            .range(["#9BBEF2", "#98BBEF", "#96B8EC", "#93B5E9", "#91B2E6", "#8EAFE3", "#8CACE0", "#89A9DD", "#87A6DA", "#84A3D7", "#82A0D4", "#7F9DD1", "#7D9ACE", "#7A97CB", "#7894C8", "#7591C5", "#738EC2", "#708BBF", "#6E88BC", "#6C85B9", "#6982B6", "#677FB3", "#647CB0", "#6279AD", "#5F76AA", "#5D73A7", "#5A70A4", "#586EA1", "#556B9E", "#53689B", "#506598", "#4E6295", "#4B5F92", "#495C8F", "#46598C", "#445689", "#425386", "#3F5083", "#3D4D80", "#3A4A7D", "#38477A", "#354477", "#334174", "#303E71", "#2E3B6E", "#2B386B", "#293568", "#263265", "#242F62", "#212C5F", "#1F295C", "#1C2659", "#1A2356", "#182154", "#0f163d"]);
+
+
+
+        var margin = {top: 40, right: 10, bottom: 30, left: 10},
+            width = parseInt(d3.select('#histChart').style('width'), 10),
+        height = parseInt(d3.select('#histChart').style('height'), 10);
+
+
+
+        var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .1);
+
+        var y = d3.scale.linear()
+            .range([height, 0]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+
+
+
+
+
+        var svg = d3.select("#chartHist").append("svg")
+            .attr("width", width )
+            .attr("height", 0.9*height );
+
+
+
+        // The following code was contained in the callback function.
+        x.domain(data.map(function(d) { return (d.ID + " - "+ d.name); }));
+        y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+
+
+        var div = d3.select("body").append("div").attr("class", "toolTip");
+
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0)
+            .attr("dy", ".89em")
+            .style("text-anchor", "end")
+            .text("Valor da Unidade");
+
+
+        var barSize = 0;
+
+        if(data.length <= 10){
+            barSize = data.length * 10
+        } else if (data.length > 10 & data.length < 30){
+            barSize = data.length * 5;
+
+        } else if (data.length > 30 & data.length < 50){
+            barSize = data.length/2;
+        }  else if (data.length > 50 & data.length <= 100){
+            barSize = data.length/4;
+        }
+
+        svg.selectAll(".bar2")
+            .data(data)
+            .enter()
+            .append("g")
+            .append("rect")
+            .attr("class", "bar2")
+            .attr("width", 0)
+            .attr("height", 0)
+             .on("mousemove", function(d){
+                div.style("left", d3.event.pageX+10+"px");
+                div.style("top", d3.event.pageY-25+"px");
+                div.style("display", "inline-block");
+                div.html("<b>Nome: "+(d.name)+"</b><br>"+"Valor Unidade:<b>"+(d.frequency)+"</b>");
+            })
+            .on('mouseout', function(d){
+                div.style("display", "none");
+            })
+
+            .transition()
+            .delay(function (d, i) { return i*40; })
+            .attr("y", function(d) {return y(d.frequency); })
+            .attr("x", function(d) { return x(d.ID + " - "+ d.name); })
+            .attr("width", barSize)
+            .attr("fill", function(d, i) {return color(i); })
+            .attr("height", function(d) { return height - y(d.frequency); });
+
+
+
+
+
+
+
 
 
 
