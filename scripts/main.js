@@ -321,6 +321,11 @@ bar
         }
 
 
+        data.sort(function(a, b){
+            return a.frequency-b.frequency
+        })
+
+
         var color = d3.scale.category20c()
             .range(["#9BBEF2", "#99BCF0", "#98BAEE", "#97B9ED", "#95B7EB", "#94B6EA", "#93B4E8", "#91B2E6", "#90B1E5", "#8FAFE3", "#8DAEE2", "#8CACE0", "#8BAADE", "#89A9DD", "#88A7DB", "#87A6DA", "#85A4D8", "#84A3D6", "#83A1D5", "#819FD3", "#809ED2", "#7F9CD0", "#7D9BCE", "#7C99CD", "#7B97CB", "#7996CA", "#7894C8", "#7793C6", "#7591C5", "#7490C3", "#738EC2", "#718CC0", "#708BBE", "#6F89BD", "#6E88BB", "#6C86BA", "#6B84B8", "#6A83B6", "#6881B5", "#6780B3", "#667EB2", "#647CB0", "#637BAE", "#6279AD", "#6078AB", "#5F76AA", "#5E75A8", "#5C73A6", "#5B71A5", "#5A70A3", "#586EA2", "#576DA0", "#566B9F", "#54699D", "#53689B", "#52669A", "#506598", "#4F6397", "#4E6295", "#4C6093", "#4B5E92", "#4A5D90", "#485B8F", "#475A8D", "#46588B", "#44568A", "#435588", "#425387", "#415285", "#3F5083", "#3E4E82", "#3D4D80", "#3B4B7F", "#3A4A7D", "#39487B", "#37477A", "#364578", "#354377", "#334275", "#324073", "#313F72", "#2F3D70", "#2E3B6F", "#2D3A6D", "#2B386B", "#2A376A", "#293568", "#273467", "#263265", "#253063", "#232F62", "#222D60", "#212C5F", "#1F2A5D", "#1E285B", "#1D275A", "#1B2558", "#1A2457", "#192255", "#182154"]);
 
@@ -401,7 +406,7 @@ bar
                 div.style("left", d3.event.pageX+10+"px");
                 div.style("top", d3.event.pageY-25+"px");
                 div.style("display", "inline-block");
-                div.html("<b>Nome: "+(d.name)+"</b><br>"+"Valor Unidade:<b>"+(d.frequency)+"</b>");
+                div.html("<b>Nome: "+(d.name)+"</b><br>"+"<b>Valor Unidade: R$ "+(d.frequency)+"</b>");
             })
             .on('mouseout', function(d){
                 div.style("display", "none");
