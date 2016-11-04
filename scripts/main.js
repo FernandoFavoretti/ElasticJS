@@ -11,7 +11,7 @@ function findGetParameter(parameterName) {
     return result;
 }
 
-
+//troxao
 
 define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) {
     var client = new elasticsearch.Client();
