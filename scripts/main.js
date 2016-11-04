@@ -56,7 +56,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
                 year: {
                     date_histogram: {
                         "field":     "DATA_EMISSAO",
-                        "interval":  "week",
+                        "interval":  "month",
                         "format": "yyyy-MM-dd"
                     }
                 }
