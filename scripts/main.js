@@ -17,16 +17,19 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
     var client = new elasticsearch.Client();
     var keyword = findGetParameter("keyword");
     var quant = findGetParameter("quant");
+    var quant1 = findGetParameter("complemento1");
     var complemento = findGetParameter("complemento");
 
 
     var matcher1 = {"DESCRICAO": ""+keyword+""}
-    var quant= {"DESCRICAO": ""+quant+""}
-    var complemento = {"DESCRICAO": ""+complemento+""}
+    var matcher2= {"DESCRICAO": ""+quant+""}
+    var matcher3= {"DESCRICAO": ""+quant1+""}
+    var matcher4 = {"DESCRICAO": ""+complemento+""}
 
     client.search({
         index: 'prodam',
-        size : 100,
+        size: 100,
+
 
 
         body: {
@@ -36,12 +39,11 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
                 bool:{
                     // Boolean query for matching and excluding items.
                     must : [
-                        {term: matcher1},
-                        {term: quant}
+                        {regexp: matcher1},
+                        {regexp: matcher2},
+                        {regexp: matcher3}
                     ],
-                    should: [
-                        {fuzzy: complemento}
-                    ]
+                    should: [ { term : matcher4 } ]
 
                 }
             },
@@ -316,8 +318,8 @@ bar
         });
 
         var data = [];
-        for (var h = 0; h < results.length; h++){
-            data.push({name: results[h].DESCRICAO, frequency: results[h].VL_UNIT,  ID: h})
+      for (var h = 0; h < results.length; h++){
+            data.push({name: results[h].DESCRICAO, frequency: results[h].VL_UNIT,  ID: h+1})
         }
 
 
@@ -369,6 +371,7 @@ bar
 
         var div = d3.select("body").append("div").attr("class", "toolTip");
 
+        console.log(resp)
 
         svg.append("g")
             .attr("class", "y axis")
@@ -377,8 +380,8 @@ bar
             .attr("transform", "rotate(-90)")
             .attr("y", 0)
             .attr("dy", ".89em")
-            .style("text-anchor", "end")
-            .text("Valor da Unidade");
+            .style("text-anchor", "end");
+
 
 
         var barSize = 0;
@@ -389,9 +392,9 @@ bar
             barSize = data.length * 5;
 
         } else if (data.length > 30 & data.length < 50){
-            barSize = data.length/2;
+            barSize = data.length/8;
         }  else if (data.length > 50 & data.length <= 100){
-            barSize = data.length/4;
+            barSize = data.length/8;
         }
 
         svg.selectAll(".bar2")
