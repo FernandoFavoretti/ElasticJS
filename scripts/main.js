@@ -17,7 +17,7 @@ define(['scripts/d3.v3', 'scripts/elasticsearch'], function (d3, elasticsearch) 
     var client = new elasticsearch.Client();
     var keyword = findGetParameter("keyword");
     var quant = findGetParameter("quant");
-    var quant1 = findGetParameter("complemento1");
+    var quant1 = findGetParameter("quant1");
     var complemento = findGetParameter("complemento");
 
 
